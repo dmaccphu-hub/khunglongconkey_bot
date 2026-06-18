@@ -18,7 +18,7 @@ def get_daily_key():
     return f"{BASE_KEY}-{datetime.now(tz).strftime('%d')}"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(f"Chào {update.effective_user.first_name}!, bấm /getkey để lấy Key bản quyền hôm nay.")
+    await update.message.reply_text(f"Chào {update.effective_user.first_name}!, bấm /getkey để lấy Key hôm nay.")
 
 async def getkey(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     daily_key = get_daily_key()
