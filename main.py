@@ -6,12 +6,10 @@ import pytz
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-# === CẤU HÌNH THÔNG TIN CHUẨN CỦA BẠN ===
 BOT_TOKEN = "8903651068:AAGKtA6hqtk-zUmM8YcxsKDU79NPSfi1SEk"
 API_URL_WEB_1 = "https://link4m.co/api-shorten/v2?api=688d0212c6e84d0e055ba168&url="
 API_URL_WEB_2 = "https://link4m.co/api-shorten/v2?api=688d0212c6e84d0e055ba168&url="
 BASE_KEY = "khunglongkey1"
-# ==========================================
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
