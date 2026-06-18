@@ -1,39 +1,60 @@
 import logging
 import urllib.parse
 import urllib.request
-import hashlib
 from datetime import datetime
 import pytz
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram.ext import Application, CommandHandler, ContextTypes
 
-# === CẤU HÌNH THÔNG TIN CỦA BẠN TẠI ĐÂY ===
+# === CẤU HÌNH THÔNG TIN ĐÃ ĐƯỢC LẮP SẴN ===
 BOT_TOKEN = "8903651068:AAGKtA6hqtk-zUmM8YcxsKDU79NPSfi1SEk"
-
-# Web vượt tầng 1 (Người dùng sẽ phải vượt qua trang này đầu tiên)
-API_URL_WEB_1 = "688d0212c6e84d0e055ba168"
-
-# Web vượt tầng 2 (Sau khi vượt xong tầng 1, họ sẽ bị bắt vượt tiếp trang này)
-API_URL_WEB_2 = "688d0212c6e84d0e055ba168"
-
-SECRET_PASSWORD = "khunglongthunghiem" 
+API_URL_WEB_1 = "https://link4m.co/api-v2?api=688d0212c6e84d0e055ba168&url="
+API_URL_WEB_2 = "https://link4m.co/api-v2?api=688d0212c6e84d0e055ba168&url="
+BASE_KEY = "khunglongkey1"
 # ==========================================
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 def get_daily_key():
     tz = pytz.timezone('Asia/Ho_Chi_Minh')
-    today_str = datetime.now(tz).strftime("%Y-%m-%d")
-    raw_string = f"{today_str}_{SECRET_PASSWORD}"
-    encoded_hash = hashlib.md5(raw_string.encode()).hexdigest().upper()
-    return f"YONKI-{encoded_hash[:6]}"
+    today_day = datetime.now(tz).strftime("%d")
+    return f"{BASE_KEY}-{today_day}"
 
-def start(update: Update, context: CallbackContext) -> None:
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
-    update.message.reply_markdown_v2(
-        fr'Chào {user.mention_markdown_v2()}\!, bấm /getkey để lấy Key bản quyền hôm nay nhé\.'
-    )
+    await update.message.reply_text(f"Chào {user.first_name}!, bấm /getkey để lấy Key hôm nay.")
 
+async def getkey(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    daily_key = get_daily_key()
+    final_destination_url = f"https://google.com/search?q=Key+Cua+Ban+Hom+Nay+La:+{daily_key}"
+    
+    try:
+        encoded_final_url = urllib.parse.quote(final_destination_url)
+        api_call_2 = f"{API_URL_WEB_2}{encoded_final_url}"
+        short_url_2 = urllib.request.urlopen(api_call_2).read().decode('utf-8').strip()
+        
+        encoded_short_url_2 = urllib.parse.quote(short_url_2)
+        api_call_1 = f"{API_URL_WEB_1}{encoded_short_url_2}"
+        short_url_1 = urllib.request.urlopen(api_call_1).read().decode('utf-8').strip()
+        
+        keyboard = [[InlineKeyboardButton("🔗 BẤM VÀO ĐÂY ĐỂ VƯỢT LINK LẤY KEY", url=short_url_1)]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await update.message.reply_text("HỆ THỐNG ĐÃ TẠO LINK VƯỢT 2 BƯỚC. Vui lòng hoàn thành vượt link để nhận Key hôm nay (Key tự đổi sau 12h đêm)!", reply_markup=reply_markup)
+        print(f"User {update.effective_user.username} đã lấy link.")
+        
+    except Exception as e:
+        await update.message.reply_text("Có lỗi xảy ra khi kết nối với hệ thống Link4M. Vui lòng thử lại sau!")
+        print(f"Lỗi API Link4M: {e}")
+
+def main() -> None:
+    application = Application.builder().token(BOT_TOKEN).build()
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("getkey", getkey))
+    application.run_polling()
+
+if __name__ == '__main__':
+    main()
 def getkey(update: Update, context: CallbackContext) -> None:
     daily_key = get_daily_key()
     
